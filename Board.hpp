@@ -6,7 +6,19 @@ enum color
 {
     BLUE = 'b',
     RED= 'r',
-    EMPTY = ' '
+    EMPTY = '_'
+};
+
+struct point
+{
+    int x;
+    int y;
+};
+
+struct moves
+{
+    int x;
+    int y;
 };
 
 enum edge
@@ -31,27 +43,33 @@ private:
     int nmbOfBlue;
     int nmbOfRed;
     color board[121];
+    color spinnedBoard[11][11];
     int nmbOfTiles = 0;
-
+    moves movesArr[6]={moves{0,1},moves{0,-1},moves{1,0},moves{-1,0},moves{1,1},moves{-1,-1}};
     //changing variables
     int actualLineLength = 1;
     int beginningOfLine = 0;
     int endOfLine = 0;
     int currLine = 0;
-    bool visited[121]={false};
-
+bool visited[11][11];
 
     //methods
     // bool isOppositeEdge(edge e1, edge e2);
-    int findLineByIndex(int i);
+    bool DFS(point p, color c);
     bool ifInRange(int i);
     bool DFS(int i, color c);
-
+    int rightCorner();
+    int leftCorner();
     int getLineSize(int i);
     void copyBoard(color *brd);
     void vistedSetFalse();
+    void spinBoard();
+    point translateToSpinned(int i);
+    int getLineInSpinned(int i);
 public:
     Board();
+    void printBoard();
+    void printSpinnedBoard();
     void readBoard();
     int getSize(){return size;}
     int getNmbOfBlue(){return nmbOfBlue;}

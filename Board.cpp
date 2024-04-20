@@ -6,15 +6,41 @@ Board::Board()
     nmbOfBlue = 0;
     nmbOfRed = 0;
     readBoard();
+    spinBoard();
+}
+
+void Board::printBoard()
+{
+    for (int i = 0; i < size * size; i++)
+    {
+
+        printf("%c ", board[i]);
+    }
+    printf("\n");
+}
+
+void Board::printSpinnedBoard()
+{
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+
+            printf("%c ", spinnedBoard[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 void Board::readBoard()
 {
+
     char a;
     char entrance[10];
     int currentSize = 0;
     while (scanf("%s", entrance), strcmp(entrance, "---") != 0)
     {
+        // printf("entrance: %s\n", entrance);
         if (entrance[0] == '<' || strcmp(entrance, "--<") == 0 || strcmp(entrance, ">-<") == 0)
         {
             scanf("%c", &a);
@@ -53,167 +79,72 @@ bool Board::isBoardCorrect()
     return (nmbOfBlue == nmbOfRed || nmbOfRed - nmbOfBlue == 1);
 }
 
-edge Board::isEdge(int i)
+bool Board::DFS(point p, color c)
 {
-    int actualLineLength = 1;
-    int beginningOfLine = 0;
-    int endOfLine = 0;
-    if (i == 0)
+    // if ( spinnedBoard[p.x][p.y] != c)
+    // {
+    //     return false;
+    // }
+    visited[p.x][p.y] = true;
+    if (p.x == size - 1 && c == BLUE)
     {
-        return UP_CORNER;
+        return true;
     }
-    if (i == nmbOfTiles - 1)
+    if (p.y == size - 1 && c == RED)
     {
-        return DOWN_CORNER;
+        return true;
     }
-    if (i == size * (size - 1))
+    for (int i = 0; i < 6; i++)
     {
-        return LEFT_CORNER;
-    }
-    if (i == size * size - 1)
-    {
-        return RIGHT_CORNER;
-    }
-    while (actualLineLength < size)
-    {
-        actualLineLength++;
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
+        point newP = point{p.x + movesArr[i].x, p.y + movesArr[i].y};
+        if (newP.x >= 0 && newP.x < size && newP.y >= 0 && newP.y < size)
         {
-            if (i == beginningOfLine)
+            if (DFS(newP, c))
             {
-                return LEFT_UP;
-            }
-            else if (i == endOfLine)
-            {
-                return RIGHT_UP;
-            }
-            else
-            {
-                return NO_EDGE;
+                return true;
             }
         }
     }
-    if (actualLineLength == size)
-    {
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i == beginningOfLine)
-        {
-            return LEFT_CORNER;
-        }
-        else if (i == endOfLine)
-        {
-            return RIGHT_CORNER;
-        }
-    }
-    while (actualLineLength < size * size - 1)
-    {
-        actualLineLength--;
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            if (i == beginningOfLine)
-            {
-                return LEFT_DOWN;
-            }
-            else if (i == endOfLine)
-            {
-                return RIGHT_DOWN;
-            }
-            else
-            {
-                return NO_EDGE;
-            }
-        }
-    }
-    return NO_EDGE;
+    // return false;
 }
 
 color Board::isGameOver()
 {
+    bool blueWon = false;
+    bool redWon = false;
     if (!isBoardCorrect())
     {
         return EMPTY;
     }
-    for (int i=0; i<size*size;i++)
+    for (int i; i < size; i++)
     {
-        edge ed = isEdge(i);
-        if ((ed == UP_CORNER || ed==LEFT_UP || ed==RIGHT_CORNER)&&board[i]==RED)
+        if (spinnedBoard[0][i] == BLUE && DFS(point{0, i}, BLUE))
         {
-            if (DFS(i, RED))
-            {
-                return RED;
-            }
+            return BLUE;
         }
-        if ((ed == DOWN_CORNER || ed==LEFT_DOWN || ed==RIGHT_CORNER)&&board[i]==BLUE)
+        if (spinnedBoard[i][0] == RED && DFS(point{i, 0}, RED))
         {
-            if (DFS(i, BLUE))
-            {
-                return BLUE;
-            }
+            return RED;
         }
     }
+
     return EMPTY;
 }
-
-int Board::findLineByIndex(int i)
-{
-    int actualLineLength = 1;
-    int beginningOfLine = 0;
-    int endOfLine = 0;
-    int currLine = 0;
-    while (actualLineLength < size)
-    {
-        actualLineLength++;
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            return currLine;
-        }
-        currLine++;
-    }
-    if (actualLineLength == size)
-    {
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            return currLine;
-        }
-        currLine++;
-    }
-    while (actualLineLength < size * size - 1)
-    {
-        actualLineLength--;
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            return currLine;
-        }
-        currLine++;
-    }
-    return currLine;
-}
-
 int Board::getLineSize(int i)
 {
+
     actualLineLength = 1;
     beginningOfLine = 0;
     endOfLine = 0;
     while (actualLineLength < size)
     {
-        actualLineLength++;
         beginningOfLine = endOfLine + 1;
         endOfLine += actualLineLength;
         if (i >= beginningOfLine && i <= endOfLine)
         {
             return actualLineLength;
         }
+        actualLineLength++;
     }
     if (actualLineLength == size)
     {
@@ -221,18 +152,19 @@ int Board::getLineSize(int i)
         endOfLine += actualLineLength;
         if (i >= beginningOfLine && i <= endOfLine)
         {
+
             return actualLineLength;
         }
     }
     while (actualLineLength < size * size - 1)
     {
-        actualLineLength--;
         beginningOfLine = endOfLine + 1;
         endOfLine += actualLineLength;
         if (i >= beginningOfLine && i <= endOfLine)
         {
             return actualLineLength;
         }
+        actualLineLength--;
     }
     return actualLineLength;
 }
@@ -245,196 +177,98 @@ void Board::copyBoard(color *brd)
     }
 }
 
-bool Board::DFS(int i, color c)
-{
-    if (board[i] != c || visited[i])
-    {
-        return false;
-    }
-    edge ed = isEdge(i);
-    visited[i] = true;
-    if (ed == RIGHT_CORNER)
-    {
-        return true;
-    }
-    if (ed == LEFT_CORNER)
-    {
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i+actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        actualLineLength = getLineSize(i - 1);
-        if (ifInRange(i-actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-    }
-    else if (ed == LEFT_UP)
-    {
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i+actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength+1) && DFS(i + actualLineLength + 1, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength + getLineSize(i + actualLineLength)) && DFS(i + actualLineLength + getLineSize(i + actualLineLength), c))
-        {
-            return true;
-        }
-
-        actualLineLength = getLineSize(i - 1);
-        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-    }
-    else if (ed == LEFT_DOWN)
-    {
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        actualLineLength = getLineSize(i - 1);
-        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength +1) && DFS(i - actualLineLength + 1, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength - getLineSize(i - actualLineLength)) && DFS(i - actualLineLength - getLineSize(i - actualLineLength), c))
-        {
-            return true;
-        }
-    }
-    else if (ed == UP_CORNER)
-    {
-        if (c == BLUE)
-            return true;
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength + 1) && DFS(i + actualLineLength + 1, c))
-        {
-            return true;
-        }
-    }
-    else if (ed == DOWN_CORNER)
-    {
-        if (c == RED)
-            return true;
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength-1) && DFS(i + actualLineLength - 1, c))
-        {
-            return true;
-        }
-    }
-    else if (ed == RIGHT_UP)
-    {
-        if (c==BLUE)
-            return true;
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-        actualLineLength = getLineSize(i+1);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength - 1) && DFS(i + actualLineLength - 1, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength + getLineSize(i + actualLineLength + 1)) && DFS(i + actualLineLength + getLineSize(i + actualLineLength + 1), c)) // te mogą być do poprawy
-        {
-            return true;
-        }
-    }
-    else if (ed == RIGHT_DOWN)
-    {
-        if (c==RED)
-            return true;
-        actualLineLength = getLineSize(i+1);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        actualLineLength = getLineSize(i-actualLineLength);
-        if (ifInRange(i -actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength - 1) && DFS(i - actualLineLength - 1, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength - getLineSize(i - actualLineLength * 2)) && DFS(i - actualLineLength - getLineSize(i - actualLineLength * 2), c))
-        {
-            return true;
-        }
-    }
-    else if (ed==RIGHT_CORNER)
-    {
-        return true;
-    }
-    else 
-    {
-        actualLineLength = getLineSize(i);
-        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i + actualLineLength+1) && DFS(i + actualLineLength + 1, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
-        {
-            return true;
-        }
-        if (ifInRange(i - actualLineLength+1) && DFS(i - actualLineLength + 1, c))
-        {
-            return true;
-        }
-        int newI = i - actualLineLength;
-        actualLineLength = getLineSize(newI);
-        if (ifInRange(newI-actualLineLength) && DFS(newI - actualLineLength, c))
-        {
-            return true;
-        }
-        actualLineLength = getLineSize(i);
-        newI = i + actualLineLength;
-        actualLineLength = getLineSize(newI);
-        if (ifInRange(newI+actualLineLength)&& DFS(newI+actualLineLength, c))
-        {
-            return true;
-        }
-    }
-    return false;
-}
 void Board::vistedSetFalse()
 {
-    for (int i; i < size * size; i++)
+    for (int i; i < size; i++)
     {
-        visited[i] = false;
+        for (int j = 0; j < size; j++)
+        {
+            visited[i][j] = false;
+        }
     }
 }
 
 bool Board::ifInRange(int i)
 {
     return i >= 0 && i < size * size;
+}
+
+int Board::rightCorner()
+{
+    return (int)(size * (float)(size) / 2 - (float)size / 2 + size - 1);
+}
+int Board::leftCorner()
+{
+    return (int)(size * (float)(size) / 2 - (float)size / 2);
+}
+
+void Board::spinBoard()
+{
+    for (int i = 0; i < size * size; i++)
+    {
+        point p = translateToSpinned(i);
+        // printf("i: %d  y: %d x: %d\n",i , p.y, p.x);
+        spinnedBoard[p.y][p.x] = board[i];
+    }
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+
+            if (spinnedBoard[i][j] != BLUE && spinnedBoard[i][j] != RED)
+            {
+                spinnedBoard[i][j] = EMPTY;
+            }
+        }
+    }
+}
+
+point Board::translateToSpinned(int i)
+{
+    point p;
+    actualLineLength = 1;
+    beginningOfLine = 0;
+    endOfLine = 0;
+    int actualLine = 0;
+    int midLine = size;
+    if (i == 0)
+    {
+        p.y = 0;
+        p.x = 0;
+        return p;
+    }
+    // if (i == size*size - 1)
+    // {
+    //     p.y = size - 1;
+    //     p.x = size - 1;
+    //     return p;
+    // }
+    while (actualLineLength < size)
+    {
+        beginningOfLine = endOfLine + 1;
+        actualLineLength++;
+        actualLine++;
+        endOfLine += actualLineLength;
+
+        if (i >= beginningOfLine && i <= endOfLine)
+        {
+            p.y = endOfLine - i;
+            p.x = actualLine - p.y;
+            return p;
+        }
+    }
+    while (actualLineLength > 1)
+    {
+        beginningOfLine = endOfLine + 1;
+        actualLineLength--;
+        actualLine++;
+        endOfLine += actualLineLength;
+        if (i >= beginningOfLine && i <= endOfLine)
+        {
+            p.y = actualLine - midLine + endOfLine - i+1;
+            p.x = actualLine - p.y;
+            return p;
+        }
+    }
+    return p;
 }

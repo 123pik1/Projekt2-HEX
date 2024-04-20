@@ -33,6 +33,8 @@ int main()
         if (strcmp(task, "IS_GAME_OVER")==0)
         {
             color wonCol = b.isGameOver();
+            // b.printBoard();
+            // b.printSpinnedBoard();
             if (wonCol == BLUE)
             {
                 printf("YES BLUE\n");
