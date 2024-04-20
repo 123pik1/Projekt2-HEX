@@ -132,51 +132,26 @@ edge Board::isEdge(int i)
     return NO_EDGE;
 }
 
-
 color Board::isGameOver()
 {
-    actualLineLength = 1;
-    beginningOfLine = 0;
-    endOfLine = 0;
-
-    if (!isBoardCorrect())
-        return EMPTY;
-    for (int i = 0; i < nmbOfTiles; i++)
+    for (int i=0; i<size*size;i++)
     {
-        if (i > endOfLine)
+        edge ed = isEdge(i);
+        if ((ed == UP_CORNER || ed==LEFT_UP || ed==RIGHT_CORNER)&&board[i]==RED)
         {
-            if (i < size * size / 2)
+            if (DFS(i, RED))
             {
-                actualLineLength++;
-                beginningOfLine = endOfLine + 1;
-                endOfLine += actualLineLength;
-            }
-            else
-            {
-                actualLineLength--;
-                beginningOfLine = endOfLine + 1;
-                endOfLine += actualLineLength;
+                return RED;
             }
         }
-        if (board[i] != EMPTY)
+        if ((ed == DOWN_CORNER || ed==LEFT_DOWN || ed==RIGHT_CORNER)&&board[i]==BLUE)
         {
-            edge ed = isEdge(i);
-            if (ed == LEFT_CORNER)
+            if (DFS(i, BLUE))
             {
-                if (fromLeftCorner(i))
-                {
-                    return board[i];
-                }
-            }
-            else if (ed == LEFT_UP && board[i] == RED)
-            {
-            }
-            else if (ed == LEFT_DOWN && board[i] == BLUE)
-            {
+                return BLUE;
             }
         }
     }
-
     return EMPTY;
 }
 
@@ -220,7 +195,6 @@ int Board::findLineByIndex(int i)
     }
     return currLine;
 }
-
 
 int Board::getLineSize(int i)
 {
@@ -267,6 +241,187 @@ void Board::copyBoard(color *brd)
     }
 }
 
+bool Board::DFS(int i, color c)
+{
+    if (board[i] != c || visited[i])
+    {
+        return false;
+    }
+    edge ed = isEdge(i);
+    visited[i] = true;
+    if (ed == RIGHT_CORNER)
+    {
+        return true;
+    }
+    if (ed == LEFT_CORNER)
+    {
+        actualLineLength = getLineSize(i);
+        if (DFS(i + actualLineLength, c))
+        {
+            return true;
+        }
+        actualLineLength = getLineSize(i - 1);
+        if (DFS(i - actualLineLength, c))
+        {
+            return true;
+        }
+    }
+    else if (ed == LEFT_UP)
+    {
+        actualLineLength = getLineSize(i);
+        if (DFS(i + actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i + actualLineLength + 1, c))
+        {
+            return true;
+        }
+        if (DFS(i + actualLineLength + getLineSize(i + actualLineLength), c))
+        {
+            return true;
+        }
+
+        actualLineLength = getLineSize(i - 1);
+        if (DFS(i - actualLineLength, c))
+        {
+            return true;
+        }
+    }
+    else if (ed == LEFT_DOWN)
+    {
+        actualLineLength = getLineSize(i);
+        if (DFS(i + actualLineLength, c))
+        {
+            return true;
+        }
+        actualLineLength = getLineSize(i - 1);
+        if (DFS(i - actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i - actualLineLength + 1, c))
+        {
+            return true;
+        }
+        if (DFS(i - actualLineLength - getLineSize(i - actualLineLength), c))
+        {
+            return true;
+        }
+    }
+    else if (ed == UP_CORNER)
+    {
+        if (c == BLUE)
+            return true;
+        actualLineLength = getLineSize(i);
+        if (DFS(i + actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i + actualLineLength + 1, c))
+        {
+            return true;
+        }
+    }
+    else if (ed == DOWN_CORNER)
+    {
+        if (c == RED)
+            return true;
+        actualLineLength = getLineSize(i);
+        if (DFS(i + actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i + actualLineLength - 1, c))
+        {
+            return true;
+        }
+    }
+    else if (ed == RIGHT_UP)
+    {
+        if (c==BLUE)
+            return true;
+        actualLineLength = getLineSize(i);
+        if (DFS(i-actualLineLength, c))
+        {
+            return true;
+        }
+        actualLineLength = getLineSize(i+1);
+        if (DFS(i+actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i+actualLineLength-1, c))
+        {
+            return true;
+        }
+        if (DFS(i+actualLineLength+getLineSize(i+actualLineLength+1), c)) //te mogą być do poprawy
+        {
+            return true;
+        }
+    }
+    else if (ed == RIGHT_DOWN)
+    {
+        if (c==RED)
+            return true;
+        actualLineLength = getLineSize(i+1);
+        if (DFS(i+actualLineLength, c))
+        {
+            return true;
+        }
+        actualLineLength = getLineSize(i-actualLineLength);
+        if (DFS(i-actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i-actualLineLength-1, c))
+        {
+            return true;
+        }
+        if (DFS(i-actualLineLength-getLineSize(i-actualLineLength*2), c))
+        {
+            return true;
+        }
+    }
+    else if (ed==RIGHT_CORNER)
+    {
+        return true;
+    }
+    else 
+    {
+        actualLineLength = getLineSize(i);
+        if (DFS(i+actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i+actualLineLength+1, c))
+        {
+            return true;
+        }
+        if (DFS(i-actualLineLength, c))
+        {
+            return true;
+        }
+        if (DFS(i-actualLineLength+1, c))
+        {
+            return true;
+        }
+        int newI = i - actualLineLength;
+        actualLineLength = getLineSize(newI);
+        if (DFS(newI-actualLineLength, c))
+        {
+            return true;
+        }
+        actualLineLength = getLineSize(i);
+        newI = i + actualLineLength;
+        actualLineLength = getLineSize(newI);
+        if (DFS(newI+actualLineLength, c))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 void Board::vistedSetFalse()
 {
     for (int i; i < size * size; i++)
@@ -274,3 +429,4 @@ void Board::vistedSetFalse()
         visited[i] = false;
     }
 }
+

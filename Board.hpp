@@ -40,12 +40,12 @@ private:
     int currLine = 0;
     bool visited[121]={false};
 
+
     //methods
     // bool isOppositeEdge(edge e1, edge e2);
     int findLineByIndex(int i);
-    bool fromLeftCorner(int i);
-    
-    
+    bool ifInRange(int i);
+    bool DFS(int i, color c);
 
     int getLineSize(int i);
     void copyBoard(color *brd);
