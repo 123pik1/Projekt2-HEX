@@ -45,6 +45,7 @@ int main()
             {
                 printf("NO\n");
             }
+            printf("\n");
         }
     }
     return 0;

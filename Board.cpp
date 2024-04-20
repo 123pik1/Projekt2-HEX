@@ -134,6 +134,10 @@ edge Board::isEdge(int i)
 
 color Board::isGameOver()
 {
+    if (!isBoardCorrect())
+    {
+        return EMPTY;
+    }
     for (int i=0; i<size*size;i++)
     {
         edge ed = isEdge(i);
@@ -256,12 +260,12 @@ bool Board::DFS(int i, color c)
     if (ed == LEFT_CORNER)
     {
         actualLineLength = getLineSize(i);
-        if (DFS(i + actualLineLength, c))
+        if (ifInRange(i+actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
         actualLineLength = getLineSize(i - 1);
-        if (DFS(i - actualLineLength, c))
+        if (ifInRange(i-actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
@@ -269,21 +273,21 @@ bool Board::DFS(int i, color c)
     else if (ed == LEFT_UP)
     {
         actualLineLength = getLineSize(i);
-        if (DFS(i + actualLineLength, c))
+        if (ifInRange(i+actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i + actualLineLength + 1, c))
+        if (ifInRange(i + actualLineLength+1) && DFS(i + actualLineLength + 1, c))
         {
             return true;
         }
-        if (DFS(i + actualLineLength + getLineSize(i + actualLineLength), c))
+        if (ifInRange(i + actualLineLength + getLineSize(i + actualLineLength)) && DFS(i + actualLineLength + getLineSize(i + actualLineLength), c))
         {
             return true;
         }
 
         actualLineLength = getLineSize(i - 1);
-        if (DFS(i - actualLineLength, c))
+        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
@@ -291,20 +295,20 @@ bool Board::DFS(int i, color c)
     else if (ed == LEFT_DOWN)
     {
         actualLineLength = getLineSize(i);
-        if (DFS(i + actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
         actualLineLength = getLineSize(i - 1);
-        if (DFS(i - actualLineLength, c))
+        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i - actualLineLength + 1, c))
+        if (ifInRange(i - actualLineLength +1) && DFS(i - actualLineLength + 1, c))
         {
             return true;
         }
-        if (DFS(i - actualLineLength - getLineSize(i - actualLineLength), c))
+        if (ifInRange(i - actualLineLength - getLineSize(i - actualLineLength)) && DFS(i - actualLineLength - getLineSize(i - actualLineLength), c))
         {
             return true;
         }
@@ -314,11 +318,11 @@ bool Board::DFS(int i, color c)
         if (c == BLUE)
             return true;
         actualLineLength = getLineSize(i);
-        if (DFS(i + actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i + actualLineLength + 1, c))
+        if (ifInRange(i + actualLineLength + 1) && DFS(i + actualLineLength + 1, c))
         {
             return true;
         }
@@ -328,11 +332,11 @@ bool Board::DFS(int i, color c)
         if (c == RED)
             return true;
         actualLineLength = getLineSize(i);
-        if (DFS(i + actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i + actualLineLength - 1, c))
+        if (ifInRange(i + actualLineLength-1) && DFS(i + actualLineLength - 1, c))
         {
             return true;
         }
@@ -342,20 +346,20 @@ bool Board::DFS(int i, color c)
         if (c==BLUE)
             return true;
         actualLineLength = getLineSize(i);
-        if (DFS(i-actualLineLength, c))
+        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
         actualLineLength = getLineSize(i+1);
-        if (DFS(i+actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i+actualLineLength-1, c))
+        if (ifInRange(i + actualLineLength - 1) && DFS(i + actualLineLength - 1, c))
         {
             return true;
         }
-        if (DFS(i+actualLineLength+getLineSize(i+actualLineLength+1), c)) //te mogą być do poprawy
+        if (ifInRange(i + actualLineLength + getLineSize(i + actualLineLength + 1)) && DFS(i + actualLineLength + getLineSize(i + actualLineLength + 1), c)) // te mogą być do poprawy
         {
             return true;
         }
@@ -365,20 +369,20 @@ bool Board::DFS(int i, color c)
         if (c==RED)
             return true;
         actualLineLength = getLineSize(i+1);
-        if (DFS(i+actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
         actualLineLength = getLineSize(i-actualLineLength);
-        if (DFS(i-actualLineLength, c))
+        if (ifInRange(i -actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i-actualLineLength-1, c))
+        if (ifInRange(i - actualLineLength - 1) && DFS(i - actualLineLength - 1, c))
         {
             return true;
         }
-        if (DFS(i-actualLineLength-getLineSize(i-actualLineLength*2), c))
+        if (ifInRange(i - actualLineLength - getLineSize(i - actualLineLength * 2)) && DFS(i - actualLineLength - getLineSize(i - actualLineLength * 2), c))
         {
             return true;
         }
@@ -390,32 +394,32 @@ bool Board::DFS(int i, color c)
     else 
     {
         actualLineLength = getLineSize(i);
-        if (DFS(i+actualLineLength, c))
+        if (ifInRange(i + actualLineLength) && DFS(i + actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i+actualLineLength+1, c))
+        if (ifInRange(i + actualLineLength+1) && DFS(i + actualLineLength + 1, c))
         {
             return true;
         }
-        if (DFS(i-actualLineLength, c))
+        if (ifInRange(i - actualLineLength) && DFS(i - actualLineLength, c))
         {
             return true;
         }
-        if (DFS(i-actualLineLength+1, c))
+        if (ifInRange(i - actualLineLength+1) && DFS(i - actualLineLength + 1, c))
         {
             return true;
         }
         int newI = i - actualLineLength;
         actualLineLength = getLineSize(newI);
-        if (DFS(newI-actualLineLength, c))
+        if (ifInRange(newI-actualLineLength) && DFS(newI - actualLineLength, c))
         {
             return true;
         }
         actualLineLength = getLineSize(i);
         newI = i + actualLineLength;
         actualLineLength = getLineSize(newI);
-        if (DFS(newI+actualLineLength, c))
+        if (ifInRange(newI+actualLineLength)&& DFS(newI+actualLineLength, c))
         {
             return true;
         }
@@ -430,3 +434,7 @@ void Board::vistedSetFalse()
     }
 }
 
+bool Board::ifInRange(int i)
+{
+    return i >= 0 && i < size * size;
+}
