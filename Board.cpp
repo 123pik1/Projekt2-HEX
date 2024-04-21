@@ -1,12 +1,30 @@
 #include "Board.hpp"
+#include <stack>
 
 Board::Board()
 {
     size = 0;
     nmbOfBlue = 0;
     nmbOfRed = 0;
+    visitedSetFalse();
     readBoard();
     spinBoard();
+}
+
+void Board::visitedSetFalse()
+{
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            visited[i][j] = false;
+        }
+    }
+}
+
+bool Board::isValidPoint(point p)
+{
+    return p.x >= 0 && p.x < size && p.y >= 0 && p.y < size;
 }
 
 void Board::printBoard()
@@ -81,92 +99,166 @@ bool Board::isBoardCorrect()
 
 bool Board::DFS(point p, color c)
 {
-    // if ( spinnedBoard[p.x][p.y] != c)
+    bool found = false;
+    if (spinnedBoard[p.y][p.x] != c)
+    {
+        // printf("color: %c x: %d y: %d\n",c, p.x, p.y);
+        return false;
+    }
+    if (visited[p.y][p.x])
+    {
+        // printf("visited x: %d y: %d\n", p.x, p.y);
+        return false;
+    }
+    // printf("y: %d x: %d\n", p.y, p.x);
+    visited[p.y][p.x] = true;
+    
+    if (p.y == size - 1 && c == BLUE)
+    {
+        // printf("x: %d y: %d\n", p.x, p.y);
+        return true;
+    }
+    if (p.x == size - 1 && c == RED)
+    {
+        // printf("x: %d y: %d\n", p.x, p.y);
+        return true;
+    }
+    // for (int i = 0; i < 6; i++)
     // {
-    //     return false;
+    //     point newP = point{p.x + movesArr[i].x, p.y + movesArr[i].y};
+    //     if (isValidPoint(newP) && spinnedBoard[newP.x][newP.y] == c && !visited[newP.x][newP.y])
+    //     {
+    //         // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+    //         if (DFS(newP, c))
+    //         {
+    //             printf("x: %d y: %d\n", p.x, p.y);
+    //             found=true;
+    //        }
+    //     }
     // }
-    visited[p.x][p.y] = true;
-    if (p.x == size - 1 && c == BLUE)
+    point newP = point{p.x + 1, p.y};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
     {
-        return true;
-    }
-    if (p.y == size - 1 && c == RED)
-    {
-        return true;
-    }
-    for (int i = 0; i < 6; i++)
-    {
-        point newP = point{p.x + movesArr[i].x, p.y + movesArr[i].y};
-        if (newP.x >= 0 && newP.x < size && newP.y >= 0 && newP.y < size)
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
         {
-            if (DFS(newP, c))
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    newP = point{p.x - 1, p.y};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
+    {
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
+        {
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    newP = point{p.x, p.y + 1};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
+    {
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
+        {
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    newP = point{p.x, p.y - 1};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
+    {
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
+        {
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    newP = point{p.x + 1, p.y + 1};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
+    {
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
+        {
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    newP = point{p.x - 1, p.y - 1};
+    if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
+    {
+        // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
+        if (DFS(newP, c))
+        {
+            // printf("x: %d y: %d\n", p.x, p.y);
+            return true;
+        }
+    }
+    return found;
+}
+
+
+bool Board::iterationDFS(point p, color c)
+{
+    std::stack<point> stack;
+    stack.push(p);
+    while (!stack.empty())
+    {
+        point curr = stack.top();
+        stack.pop();
+        if (spinnedBoard[curr.y][curr.x] != c || visited[curr.y][curr.x])
+        {
+            continue;
+        }
+        visited[curr.y][curr.x] = true;
+        if (curr.y == size - 1 && c == BLUE)
+        {
+            return true;
+        }
+        if (curr.x == size - 1 && c == RED)
+        {
+            return true;
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            point newP = point{curr.x + movesArr[i].x, curr.y + movesArr[i].y};
+            if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
             {
-                return true;
+                stack.push(newP);
             }
         }
     }
-    // return false;
+    return false;
+
 }
 
 color Board::isGameOver()
-{
+{   
+    visitedSetFalse();
     bool blueWon = false;
     bool redWon = false;
     if (!isBoardCorrect())
     {
         return EMPTY;
     }
-    for (int i; i < size; i++)
+    // printf("size: %d\n", size);
+    for (int i = 0; i < size; i++)
     {
-        if (spinnedBoard[0][i] == BLUE && DFS(point{0, i}, BLUE))
+        
+        //               y   x                              x  y
+        if (spinnedBoard[10][i] == BLUE && DFS(point{i, 0}, BLUE))
         {
             return BLUE;
         }
-        if (spinnedBoard[i][0] == RED && DFS(point{i, 0}, RED))
+        if (spinnedBoard[i][10] == RED && DFS(point{0, i}, RED))
         {
             return RED;
         }
     }
 
     return EMPTY;
-}
-int Board::getLineSize(int i)
-{
-
-    actualLineLength = 1;
-    beginningOfLine = 0;
-    endOfLine = 0;
-    while (actualLineLength < size)
-    {
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            return actualLineLength;
-        }
-        actualLineLength++;
-    }
-    if (actualLineLength == size)
-    {
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-
-            return actualLineLength;
-        }
-    }
-    while (actualLineLength < size * size - 1)
-    {
-        beginningOfLine = endOfLine + 1;
-        endOfLine += actualLineLength;
-        if (i >= beginningOfLine && i <= endOfLine)
-        {
-            return actualLineLength;
-        }
-        actualLineLength--;
-    }
-    return actualLineLength;
 }
 
 void Board::copyBoard(color *brd)
@@ -265,7 +357,7 @@ point Board::translateToSpinned(int i)
         endOfLine += actualLineLength;
         if (i >= beginningOfLine && i <= endOfLine)
         {
-            p.y = actualLine - midLine + endOfLine - i+1;
+            p.y = actualLine - midLine + endOfLine - i + 1;
             p.x = actualLine - p.y;
             return p;
         }
