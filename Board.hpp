@@ -79,6 +79,7 @@ public:
     void printBoard();
     void printSpinnedBoard();
     void readBoard();
+    bool isBoardPossible();
     int getSize() { return size; }
     int getNmbOfBlue() { return nmbOfBlue; }
     int getNmbOfRed() { return nmbOfRed; }

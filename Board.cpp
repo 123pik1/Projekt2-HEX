@@ -236,11 +236,11 @@ bool Board::iterationDFS(point p, color c)
 
 color Board::isGameOver()
 {   
-    visitedSetFalse();
     bool blueWon = false;
     bool redWon = false;
     if (!isBoardCorrect())
     {
+        // printf("Board is not correct\n");
         return EMPTY;
     }
     // printf("size: %d\n", size);
@@ -248,11 +248,11 @@ color Board::isGameOver()
     {
         
         //               y   x                              x  y
-        if (spinnedBoard[10][i] == BLUE && DFS(point{i, 0}, BLUE))
+        if (spinnedBoard[0][i] == BLUE && DFS(point{i, 0}, BLUE))
         {
             return BLUE;
         }
-        if (spinnedBoard[i][10] == RED && DFS(point{0, i}, RED))
+        if (spinnedBoard[i][0] == RED && DFS(point{0, i}, RED))
         {
             return RED;
         }
@@ -363,4 +363,28 @@ point Board::translateToSpinned(int i)
         }
     }
     return p;
+}
+
+
+bool Board::isBoardPossible()
+{
+    if (!isBoardCorrect())
+    {
+        return false;
+    }
+    visitedSetFalse();
+    color wonCol = isGameOver();
+    if (wonCol == EMPTY)
+    {
+        return true;
+    }
+    wonCol = isGameOver();
+    if (wonCol == EMPTY)
+    {
+        return true;
+    }
+
+
+
+    return false;
 }

@@ -49,6 +49,13 @@ int main()
             }
             printf("\n");
         }
+        if (strcmp(task, "IS_BOARD_POSSIBLE")==0)
+        {
+            if (b.isBoardPossible())
+                printf("YES\n");
+            else
+                printf("NO\n");
+        }
     }
     return 0;
 }
