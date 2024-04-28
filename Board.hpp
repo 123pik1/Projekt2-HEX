@@ -6,7 +6,8 @@ enum color
 {
     BLUE = 'b',
     RED = 'r',
-    EMPTY = '_'
+    EMPTY = '_',
+    BOTH = 'x'
 };
 
 struct point
@@ -71,11 +72,19 @@ private:
     void spinBoard();
     point translateToSpinned(int i);
     int getLineInSpinned(int i);
-    void visitedSetFalse();
     bool isValidPoint(point p);
-
+    bool ifDoubleLine();
+    bool naiveCheckOne(color col);
+    bool naiveCheckTwo(color col);
+    void addPawn(color col,point p);
+    void removePawn( point p);
 public:
     Board();
+    void newBoard();
+    void visitedSetFalse();
+    bool naiveOneRed();
+    bool naiveOneBlue();
+    bool naiveTwoRed();
     void printBoard();
     void printSpinnedBoard();
     void readBoard();

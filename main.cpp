@@ -3,18 +3,19 @@
 #include <string.h>
 #include <cstring>
 #include "Board.hpp"
+
 using namespace std;
 int main()
 {
-    char task[50];
-
+    char task[100];
+    // freopen("x.in", "r", stdin);
+    Board b;
     while (scanf("%s", task) != EOF)
     {
         // scanf("%s", task);
         // printf("%s\n", task);
-
-        Board b;
-        scanf("%s", task);
+        if (strcmp(task, "---") == 0)
+            b.newBoard(); // czyszczenie boarda
         if (strcmp(task, "BOARD_SIZE") == 0)
         {
             printf("%d\n", b.getSize());
@@ -23,15 +24,16 @@ int main()
         {
             printf("%d\n", b.getNmbOfBlue() + b.getNmbOfRed());
         }
-        if (strcmp(task, "IS_BOARD_CORRECT")==0)
+        if (strcmp(task, "IS_BOARD_CORRECT") == 0)
         {
             if (b.isBoardCorrect())
                 printf("YES\n");
             else
                 printf("NO\n");
         }
-        if (strcmp(task, "IS_GAME_OVER")==0)
+        if (strcmp(task, "IS_GAME_OVER") == 0)
         {
+            b.visitedSetFalse();
             color wonCol = b.isGameOver();
             // b.printBoard();
             // b.printSpinnedBoard();
@@ -49,9 +51,32 @@ int main()
             }
             printf("\n");
         }
-        if (strcmp(task, "IS_BOARD_POSSIBLE")==0)
+        if (strcmp(task, "IS_BOARD_POSSIBLE") == 0)
         {
             if (b.isBoardPossible())
+                printf("YES\n\n");
+            else
+                printf("NO\n\n");
+        }
+        if (strcmp(task, "CAN_RED_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") == 0) // naive wgl nie działa!!!!
+        {
+            if (b.naiveOneRed())
+                printf("YES\n");
+
+            else
+                printf("NO\n");
+        }
+        if (strcmp(task, "CAN_BLUE_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") == 0)
+        {
+            if (b.naiveOneBlue())
+                printf("YES\n");
+
+            else
+                printf("NO\n");
+        }
+        if (strcmp(task, "CAN_RED_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT")==0)
+        {
+            if (b.naiveTwoRed())
                 printf("YES\n");
             else
                 printf("NO\n");

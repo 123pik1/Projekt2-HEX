@@ -3,11 +3,16 @@
 
 Board::Board()
 {
+    // newBoard();
+    // printSpinnedBoard();
+}
+void Board::newBoard()
+{
     size = 0;
     nmbOfBlue = 0;
     nmbOfRed = 0;
-    visitedSetFalse();
     readBoard();
+    visitedSetFalse();
     spinBoard();
 }
 
@@ -112,7 +117,7 @@ bool Board::DFS(point p, color c)
     }
     // printf("y: %d x: %d\n", p.y, p.x);
     visited[p.y][p.x] = true;
-    
+
     if (p.y == size - 1 && c == BLUE)
     {
         // printf("x: %d y: %d\n", p.x, p.y);
@@ -123,19 +128,7 @@ bool Board::DFS(point p, color c)
         // printf("x: %d y: %d\n", p.x, p.y);
         return true;
     }
-    // for (int i = 0; i < 6; i++)
-    // {
-    //     point newP = point{p.x + movesArr[i].x, p.y + movesArr[i].y};
-    //     if (isValidPoint(newP) && spinnedBoard[newP.x][newP.y] == c && !visited[newP.x][newP.y])
-    //     {
-    //         // printf("color: %c  x: %d y: %d\n",c, newP.x, newP.y);
-    //         if (DFS(newP, c))
-    //         {
-    //             printf("x: %d y: %d\n", p.x, p.y);
-    //             found=true;
-    //        }
-    //     }
-    // }
+
     point newP = point{p.x + 1, p.y};
     if (isValidPoint(newP) && spinnedBoard[newP.y][newP.x] == c && !visited[newP.y][newP.x])
     {
@@ -199,7 +192,6 @@ bool Board::DFS(point p, color c)
     return found;
 }
 
-
 bool Board::iterationDFS(point p, color c)
 {
     std::stack<point> stack;
@@ -231,11 +223,12 @@ bool Board::iterationDFS(point p, color c)
         }
     }
     return false;
-
 }
 
 color Board::isGameOver()
-{   
+{
+    visitedSetFalse();
+
     bool blueWon = false;
     bool redWon = false;
     if (!isBoardCorrect())
@@ -246,24 +239,35 @@ color Board::isGameOver()
     // printf("size: %d\n", size);
     for (int i = 0; i < size; i++)
     {
-        
+
         //               y   x                              x  y
         if (spinnedBoard[0][i] == BLUE && DFS(point{i, 0}, BLUE))
         {
-            return BLUE;
+            blueWon = true;
         }
         if (spinnedBoard[i][0] == RED && DFS(point{0, i}, RED))
         {
-            return RED;
+            redWon = true;
         }
     }
-
+    if (blueWon && redWon)
+    {
+        return BOTH;
+    }
+    if (blueWon)
+    {
+        return BLUE;
+    }
+    if (redWon)
+    {
+        return RED;
+    }
     return EMPTY;
 }
 
 void Board::copyBoard(color *brd)
 {
-    for (int i; i < size * size; i++)
+    for (int i = 0; i < size * size; i++)
     {
         brd[i] = board[i];
     }
@@ -271,7 +275,7 @@ void Board::copyBoard(color *brd)
 
 void Board::vistedSetFalse()
 {
-    for (int i; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++)
         {
@@ -317,7 +321,7 @@ void Board::spinBoard()
 
 point Board::translateToSpinned(int i)
 {
-    point p;
+    point p = point{0, 0};
     actualLineLength = 1;
     beginningOfLine = 0;
     endOfLine = 0;
@@ -365,9 +369,9 @@ point Board::translateToSpinned(int i)
     return p;
 }
 
-
 bool Board::isBoardPossible()
 {
+    // printf("red: %d\n blue: %d\n", nmbOfRed, nmbOfBlue);
     if (!isBoardCorrect())
     {
         return false;
@@ -378,13 +382,196 @@ bool Board::isBoardPossible()
     {
         return true;
     }
-    wonCol = isGameOver();
-    if (wonCol == EMPTY)
+    if (wonCol == BOTH)
     {
-        return true;
+        return false;
     }
+    bool ifDb = ifDoubleLine();
+    // printf("%d\n", ifDb);
+    // printf("%c\n", wonCol);
+    // printf("red: %d\n blue: %d\n", nmbOfRed, nmbOfBlue);
+    if (ifDb)
+        return false;
+    if (wonCol == RED && nmbOfRed - 1 != nmbOfBlue)
+        return false;
 
+    if (wonCol == BLUE && nmbOfBlue != nmbOfRed)
+        return false;
 
+    // if (isGameOver() == EMPTY)
+    // {
+    //     if (wonCol == BLUE && nmbOfRed == nmbOfBlue)
+    //         return true;
+    //     if (wonCol == RED && nmbOfRed > nmbOfBlue)
+    //         return true;
+    // }
 
+    return true;
+}
+
+bool Board::ifDoubleLine()
+{
+    color col;
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            point p;
+            p.x = j;
+            p.y = i;
+            if (isValidPoint(p))
+            {
+                col = spinnedBoard[i][j];
+                spinnedBoard[i][j] = EMPTY;
+                if (isGameOver() == EMPTY)
+                {
+                    spinnedBoard[i][j] = col;
+                    return false;
+                }
+                spinnedBoard[i][j] = col;
+            }
+        }
+    }
+    return true;
+}
+
+bool Board::naiveOneRed()
+{
+    return naiveCheckOne(RED);
+}
+bool Board::naiveOneBlue()
+{
+    return naiveCheckOne(BLUE);
+}
+
+bool Board::naiveCheckOne(color col)
+{
+
+    if (!isBoardCorrect())
+        return false;
+
+    if (isGameOver() != EMPTY)
+        return false;
+    color begins;
+    if (nmbOfBlue == nmbOfRed)
+        begins = RED;
+    else
+        begins = BLUE;
+
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            if (spinnedBoard[i][j] == EMPTY)
+            {
+                // addPawn(begins,{j,i});
+                spinnedBoard[i][j] = begins;
+
+                if (begins == col)
+                {
+                    if (isGameOver())
+                    {
+                        spinnedBoard[i][j] = EMPTY;
+                        return true;
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < size; k++)
+                        for (int l = 0; l < size; l++)
+                        {
+                            if (spinnedBoard[k][l] == EMPTY)
+                            {
+                                spinnedBoard[k][l] = col;
+                                if (isGameOver() == col)
+                                {
+                                    spinnedBoard[k][l] = EMPTY;
+                                    spinnedBoard[i][j] = EMPTY;
+                                    return true;
+                                }
+
+                                spinnedBoard[k][l] = EMPTY;
+                            }
+                        }
+                }
+            }
+
+            spinnedBoard[i][j] = EMPTY;
+        }
+    }
     return false;
+}
+
+bool Board::naiveTwoRed()
+{
+    return naiveCheckTwo(RED);
+}
+
+bool Board::naiveCheckTwo(color col)
+{
+    if (!isBoardCorrect())
+        return false;
+    if (isGameOver() != EMPTY)
+        return false;
+    color begins;
+    if (nmbOfBlue == nmbOfRed)
+        begins = RED;
+    else
+        begins = BLUE;
+    for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+        {
+            if (spinnedBoard[i][j] == EMPTY)
+            {
+                addPawn(begins,{j,i});
+                if (begins != col)
+                {
+                    if (naiveCheckOne(col))
+                    {
+                        spinnedBoard[i][j] = EMPTY;
+                        return true;
+                    }
+                }
+                else
+                {
+                    for (int k = 0; k < size; k++)
+                        for (int l = 0; l < size; l++)
+                        {
+                            if (spinnedBoard[k][l] == EMPTY)
+                            {
+                                // spinnedBoard[k][l] = col;
+                                addPawn(col, {j,k});
+                                if (naiveCheckOne(col))
+                                {
+                                    removePawn({j, i});
+                                    removePawn({l,k});
+                                    return true;
+                                }
+
+                                removePawn({l, k});
+                            }
+                        }
+                }
+            }
+            removePawn({j,i});
+        }
+    return false;
+}
+
+void Board::addPawn(color col,point p) // coś z tym nie tak? WTF?
+{
+    spinnedBoard[p.y][p.x]=col; 
+    if (col == RED)
+        nmbOfRed++;
+    if (col == BLUE)
+        nmbOfBlue++;
+}
+
+void Board::removePawn(point p)
+{
+    if (spinnedBoard[p.y][p.x] == RED)
+        nmbOfRed--;
+    if (spinnedBoard[p.y][p.x] == BLUE)
+        nmbOfBlue--;
+    spinnedBoard[p.y][p.x] = EMPTY;
 }

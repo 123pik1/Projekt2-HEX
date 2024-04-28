@@ -1,7 +1,8 @@
-
     ---
- --< r >--
-<   >-< r >
- --< b >--
+ --<   >--
+<   >-<   >
+ --<   >--
     ---
-IS_BOARD_POSSIBLE
+CAN_RED_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT
+CAN_BLUE_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT
+CAN_RED_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT
