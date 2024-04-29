@@ -250,27 +250,22 @@ bool Board::iterationDFS(point p, color c)
 
 color Board::isGameOver()
 {
-   
+    visitedSetFalse();
+    printSpinnedBoard();
+    bool blueWon = false;
+    bool redWon = false;
     if (!isBoardCorrect())
     {
         // printf("Board is not correct\n");
         return EMPTY;
     }
     // printf("size: %d\n", size);
-   return isGameOverSkip();
-}
-
-color Board::isGameOverSkip()
-{
-    visitedSetFalse();
-    bool blueWon = false;
-    bool redWon = false;
     for (int i = 0; i < size; i++)
     {
-        //               y   x                      x  y
+        //               y   x                              x  y
         if (spinnedBoard[0][i] == BLUE && DFS(point{i, 0}, BLUE))
         {
-            return BLUE;
+           return BLUE;
         }
         if (spinnedBoard[i][0] == RED && DFS(point{0, i}, RED))
         {
@@ -290,7 +285,11 @@ color Board::isGameOverSkip()
         return RED;
     }
     return EMPTY;
-   
+}
+
+color Board::isGameOverSkip()
+{
+    
 }
 
 void Board::copyBoard(color *brd)
@@ -516,13 +515,16 @@ void Board::addPawn(color col, point p) // coś z tym nie tak? WTF?
 
 void Board::removePawn(point p)
 {
-   
+    // printf("y: %d x: %d \n", p.y, p.x);
+    // printSpinnedBoard();
+    // printf("\n\n\n");
     if (spinnedBoard[p.y][p.x] == RED)
         nmbOfRed--;
     if (spinnedBoard[p.y][p.x] == BLUE)
         nmbOfBlue--;
     spinnedBoard[p.y][p.x] = EMPTY;
-    
+    // printSpinnedBoard();
+    // printf("\n\n\n");
 }
 
 void Board::removePawn(color col, point p)
@@ -542,7 +544,17 @@ color Board::beginCol()
 
 bool Board::naiveCheckTwo(color col)
 {
-  
+    // printSpinnedBoard();
+    // printf("red: %d blue %d\n", nmbOfRed, nmbOfBlue);
+    // addPawn(col, {0, 1});
+    // printSpinnedBoard();
+    // printf("red: %d blue %d\n", nmbOfRed, nmbOfBlue);
+
+    // removePawn({0, 1});
+    // printSpinnedBoard();
+    // printf("red: %d blue %d\n", nmbOfRed, nmbOfBlue);
+
+    // spinBoard();
 
     if (!isBoardCorrect())
         return false;
@@ -561,20 +573,76 @@ bool Board::naiveCheckTwo(color col)
             if (spinnedBoard[i][j] == EMPTY)
             {
                 addPawn(col, {j, i});
-                if (naiveCheckOneSkip(col))
+                if (naiveCheckOne(col))
                 {
                     removePawn(col, {j, i});
                     return true;
                 }
                 
-             
+                // for (int k = 0; k < size; k++)
+                //     for (int l = 0; l < size; l++)
+                //         if (spinnedBoard[k][l] == EMPTY)
+                //         {
+                //             addPawn(col, {l, k});
+                //             if (isGameOver() == col)
+                //             {
+                //                 removePawn({l, k});
+                //                 removePawn({j, i});
+
+                //                 return true;
+                //             }
+                //             removePawn({l, k});
+                //         }
                 removePawn({j, i});
 
-              
+                // printf("\n");
+                // printSpinnedBoard();
+                // if (begins == col)
+                // {
+                //     // if (begins == RED)
+                //     // nmbOfRed++;
+                //     // if (begins == BLUE)
+                //     // nmbOfBlue++;
+                //     if (naiveCheckOne(col))
+                //     {
+                //         removePawn(begins,{j, i});
+                //         return true;
+                //     }
+                // }
+                // else
+                // {
+                  
+                    // for (int k = 0; k < size; k++)
+                    //     for (int l = 0; l < size; l++)
+                    //         if (spinnedBoard[k][l] == EMPTY)
+                    //         {
+                    // //             printf("%c\n", spinnedBoard[k][l]);
+                    // //             printf("k: %d l: %d\n", k, l);
+                    // // //             // spinnedBoard[k][l] = col;
+                    //             addPawn(col, {l, k});
+                    // // //             // printf("\n");
+                    // // //             // printSpinnedBoard();
+                    // // //             //             // printSpinnedBoard();
+                    // // //             // printf("\n");
+                    //             if (isGameOver()==col)
+                    //             {
+                    //                 removePawn(begins,{j, i});
+                    //                 removePawn(col,{l, k});
+                    //                 return true;
+                    //             }
+                    // // // //             // printf("tu\n");
+                    // // //             // spinnedBoard[k][l] = EMPTY;
+                    //             removePawn({l, k});
+
+                    //         }
+                // }
+                // spinBoard();
+
             }
         }
     }
-   
+    // printSpinnedBoard();
+    // printf("red: %d blue %d\n", nmbOfRed, nmbOfBlue);
     return false;
 }
 
@@ -583,17 +651,16 @@ bool Board::naiveCheckOne(color col)
 
     if (!isBoardCorrect())
         return false;
-    return naiveCheckOneSkip(col);
-}
 
-bool Board::naiveCheckOneSkip(color col)
-{
     if (isGameOver() != EMPTY)
         return false;
     color begins = beginCol();
     if (nmbOfBlue + nmbOfRed + 1 /*liczba ruchów *3/2 */ + (beginCol() == col ? 0 : 1) > size * size)
         return false;
-   
+    // if (nmbOfBlue == nmbOfRed)
+    //     begins = RED;
+    // else
+    //     begins = BLUE;
 
     for (int i = 0; i < size; i++)
     {
@@ -604,16 +671,49 @@ bool Board::naiveCheckOneSkip(color col)
                 addPawn(col, {j, i});
                 // printSpinnedBoard();
                 // printf("\n");
-                if (isGameOverSkip() != EMPTY)
+                if (isGameOver() != EMPTY)
                 {
                     removePawn({j, i});
                     return true;
                 }
                 removePawn({j, i});
 
+
+
+                // addPawn(begins,{j,i});
+                // spinnedBoard[i][j] = begins;
+
+                // if (begins == col)
+                // {
+                //     if (isGameOver() == col)
+                //     {
+                //         spinnedBoard[i][j] = EMPTY;
+                //         return true;
+                //     }
+                // }
+                // else
+                // {
+                //     for (int k = 0; k < size; k++)
+                //         for (int l = 0; l < size; l++)
+                //         {
+                //             if (spinnedBoard[k][l] == EMPTY)
+                //             {
+                //                 spinnedBoard[k][l] = col;
+                //                 if (isGameOver() == col)
+                //                 {
+                //                     spinnedBoard[k][l] = EMPTY;
+                //                     spinnedBoard[i][j] = EMPTY;
+                //                     return true;
+                //                 }
+
+                //                 spinnedBoard[k][l] = EMPTY;
+                //             }
+                //         }
+                // }
+                // spinnedBoard[i][j] = EMPTY;
             }
         }
     }
-
+  
     return false;
 }

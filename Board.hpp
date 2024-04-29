@@ -78,13 +78,19 @@ private:
     bool naiveCheckTwo(color col);
     void addPawn(color col,point p);
     void removePawn( point p);
+    void removePawn(color col,point p);
+    color beginCol();
+    color isGameOverSkip();
+    bool naiveCheckOneSkip(color col);
 public:
     Board();
+    void eraseBoard();
     void newBoard();
     void visitedSetFalse();
     bool naiveOneRed();
     bool naiveOneBlue();
     bool naiveTwoRed();
+    bool naiveTwoBlue();
     void printBoard();
     void printSpinnedBoard();
     void readBoard();
