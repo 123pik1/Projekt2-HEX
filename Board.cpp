@@ -356,6 +356,12 @@ void Board::spinBoard()
         }
     }
 }
+color Board::getOppositeColor(color col)
+{
+    if (col == RED)
+        return BLUE;
+    return RED;
+}
 
 point Board::translateToSpinned(int i)
 {
@@ -617,3 +623,138 @@ bool Board::naiveCheckOneSkip(color col)
 
     return false;
 }
+
+bool Board::perfectOneRed()
+{
+    if (size - nmbOfRed > 1)
+        return false;
+    return perfectCheckOne(RED);
+}
+
+
+bool Board::perfectCheckOne(color col)
+{
+    if (!isBoardCorrect())
+        return false;
+    return perfectCheckOneSkip(col);
+}
+
+bool Board::perfectCheckOneSkip(color col)
+{
+    if (isGameOver() != EMPTY)
+        return false;
+    if (col == beginCol())
+    {
+        for (int i=0; i<size; i++)
+        {
+            for (int j=0; j<size; j++)
+            {
+                if (spinnedBoard[i][j] == EMPTY)
+                {
+                    addPawn(col, {j, i});
+                    if (isGameOverSkip() != EMPTY)
+                    {
+                        removePawn({j, i});
+                        return true;
+                    }
+                    removePawn({j, i});
+                }
+            }
+        }
+    }
+    else
+    {
+        if (perfectCheckOneSkip(beginCol()))
+            return false;
+        for (int i=0; i<size; i++)
+        {
+            for (int j=0; j<size; j++)
+            {
+                if (spinnedBoard[i][j] == EMPTY)
+                {
+                    addPawn(beginCol(), {j, i});
+                    if (!perfectCheckOneSkip(col))
+                    {
+                        removePawn({j, i});
+                        return false;
+                    }
+                    removePawn({j, i});
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Board::perfectOneBlue()
+{
+    if (size - nmbOfBlue > 1)
+        return false;
+    return perfectCheckOne(BLUE);
+}
+bool Board::perfectTwoRed()
+{
+    if (size - nmbOfRed > 2)
+        return false;
+    return perfectCheckTwo(RED);
+}
+bool Board::perfectTwoBlue()
+{
+    if (size - nmbOfBlue > 2)
+        return false;
+    return perfectCheckTwo(BLUE);
+}
+
+bool Board::perfectCheckTwo(color col)
+{
+    if (!isBoardCorrect())
+        return false;
+    if (isGameOver() != EMPTY)
+        return false;
+    if (nmbOfBlue + nmbOfRed + 3 /* liczba ruchów * 3/2 */ + (beginCol() == col ? 0 : 1) > size * size)
+        return false;
+    if (col!=beginCol())
+    {
+        if (perfectCheckOneSkip(beginCol()))
+            return false;
+        if (perfectCheckTwo(beginCol()))
+            return false;
+        for (int i=0; i<size; i++)
+        {
+            for (int j=0; j<size; j++)
+            {
+                if (spinnedBoard[i][j] == EMPTY)
+                {
+                    addPawn(beginCol(), {j, i});
+                    if (!perfectCheckTwo(col))
+                    {
+                        removePawn({j, i});
+                        return false;
+                    }
+                    removePawn({j, i});
+                }
+            }
+        }
+        return true;
+    }
+    for (int i=0; i<size; i++)
+    {
+        for (int j=0; j<size; j++)
+        {
+            if (spinnedBoard[i][j] == EMPTY)
+            {
+                addPawn(col, {j, i});
+                if (perfectCheckOneSkip(col))
+                {
+                    removePawn({j, i});
+                    return true;
+                }
+                removePawn({j, i});
+            }
+        }
+    }
+    
+    return false;
+}
+

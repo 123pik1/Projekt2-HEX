@@ -82,6 +82,10 @@ private:
     color beginCol();
     color isGameOverSkip();
     bool naiveCheckOneSkip(color col);
+    bool perfectCheckOne(color col);
+    bool perfectCheckOneSkip(color col);
+    bool perfectCheckTwo(color col);
+    color getOppositeColor(color col);
 public:
     Board();
     void eraseBoard();
@@ -91,6 +95,10 @@ public:
     bool naiveOneBlue();
     bool naiveTwoRed();
     bool naiveTwoBlue();
+    bool perfectOneRed();
+    bool perfectOneBlue();
+    bool perfectTwoRed();
+    bool perfectTwoBlue();
     void printBoard();
     void printSpinnedBoard();
     void readBoard();
